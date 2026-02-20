@@ -1,0 +1,3 @@
+*** `init.el` and friends
+
+Just a copy of my simple emacs config that I use daily. Focused on `C` stuff, `LaTeX` academic writting and `org-mode`. For now, it is just a very basic configuration that have no value.
