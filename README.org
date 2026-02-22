@@ -1,3 +1,8 @@
-*** `init.el` and friends
+* ~init.el~ and friends
 
-Just a copy of my simple emacs config that I use daily. Focused on `C` stuff, `LaTeX` academic writting and `org-mode`. For now, it is just a very basic configuration that have no value.
+Just a copy of my simple emacs config that I use daily, tested in
+~emacs-v30~. Focused on ~C~ stuff, ~LaTeX~ academic writting and
+~org-mode~.  This is just a personal ~.file~, do not expect something
+amazing when cloning this repo. You may need to install the [[https://github.com/Echinoidea/Aporetic-Nerd-Font][Aporetic
+Nerd Font]]. Check ~init.el~ for other things you may need to install
+outside Emacs, like ~texlive-full~, ~git~ or ~lsp~.
