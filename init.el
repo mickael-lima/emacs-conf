@@ -5,8 +5,6 @@
 (require 'package)
 (add-to-list 'package-archives '("gnu"   . "https://elpa.gnu.org/packages/"))
 
-(package-initialize)
-
 ;; Configuring use-package for emacs < 29
 (when (< emacs-major-version 29)
   (unless (package-installed-p 'use-package)
@@ -35,54 +33,98 @@
 ;; Revert buffers when the underlying file has changed
 (global-auto-revert-mode 1)
 
-;; Why this is not the default
+;; Why this is not the default?
 (setq delete-selection-mode t)
 
+;; LaTeX variables
+(add-to-list 'TeX-view-program-list '("PDF Tools" TeX-pdf-tools-sync-view))
+(setq TeX-view-program-selection '((output-pdf "PDF Tools")))
+
+(setq TeX-source-correlate-mode t)
+(setq TeX-source-correlate-method '((pdf . synctex)))
+
+(add-hook 'TeX-after-compilation-finished-functions
+          #'TeX-revert-document-buffer)
+
+(setq-default TeX-master nil)
+
 ;; --- Packages ---
-
-;; AucTeX settings - from https://gist.github.com/karthink/7d89df35ee9b7ac0c93d0177b862dadb
-(use-package latex
-  :ensure auctex
-  :hook ((LaTeX-mode . prettify-symbols-mode))
-  :bind (:map LaTeX-mode-map
-         ("C-S-e" . latex-math-from-calc))
-  :config
-
-  ;; Format math as a Latex string with Calc
-  (defun latex-math-from-calc ()
-    "Evaluate `calc' on the contents of line at point."
-    (interactive)
-    (cond ((region-active-p)
-           (let* ((beg (region-beginning))
-                  (end (region-end))
-                  (string (buffer-substring-no-properties beg end)))
-             (kill-region beg end)
-             (insert (calc-eval `(,string calc-language latex
-                                          calc-prefer-frac t
-                                          calc-angle-mode rad)))))
-          (t (let ((l (thing-at-point 'line)))
-               (end-of-line 1) (kill-line 0)
-               (insert (calc-eval `(,l
-                                    calc-language latex
-                                    calc-prefer-frac t
-                                    calc-angle-mode rad))))))))
-
-(use-package preview
-  :after latex
-  :hook ((LaTeX-mode . preview-larger-previews))
-  :config
-  (defun preview-larger-previews ()
-    (setq preview-scale-function
-          (lambda () (* 1.25
-                   (funcall (preview-scale-from-face)))))))
-
-;; CDLatex settings
-(use-package cdlatex
+(use-package evil
   :ensure t
-  :hook (LaTeX-mode . turn-on-cdlatex)
-  :bind (:map cdlatex-mode-map
-              ("<tab>" . cdlatex-tab)))
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  (setq evil-want-C-u-scroll t)
+  (setq evil-want-C-i-jump nil)
+  (evil-mode 1)
+  
+  :hook
+  (conf-mode . turn-on-evil-mode)
+  (prog-mode . turn-on-evil-mode)
+  (text-mode . turn-on-evil-mode)
 
+  :config
+  (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+  (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+
+  ;; Use visual line motions even outside of visual-line-mode buffers
+  (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+  (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+
+  (evil-set-initial-state 'messages-buffer-mode 'normal)
+  (evil-set-initial-state 'dashboard-mode 'normal))
+
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init))
+
+;; AucTeX settings - from https://fmneto.com/2026/04/17/ensinando-latex-para-o-emacs/
+(use-package pdf-tools
+  :ensure t)
+
+(use-package tex
+  :ensure auctex
+  :defer t
+  :hook ((LaTeX-mode . LaTeX-math-mode)
+	 (LaTeX-mode . turn-on-reftex)
+	 (LaTeX-mode . visual-line-mode)
+	 (LaTeX-mode . outline-minor-mode)
+	 (LaTeX-mode . TeX-source-correlate-mode)
+	 (LaTeX-mode . (lambda ()
+			 (setq-local TeX-command-default "LatexMk"))))
+  :config
+  (setq TeX-auto-save t
+      TeX-parse-self t
+      TeX-save-query nil
+      TeX-PDF-mode t
+      TeX-engine 'xetex
+      TeX-source-correlate-mode t
+      TeX-source-correlate-method 'synctex
+      TeX-source-correlate-start-server t))
+
+(use-package company-auctex
+  :after (company tex)
+  :config
+  (company-auctex-init))
+
+(use-package reftex
+  :defer t
+  :hook (LaTeX-mode . turn-on-reftex)
+  :config
+  (setq reftex-plug-into-AUCTeX t
+        reftex-save-parse-info t
+        reftex-cite-prompt-optional-args t)
+
+  (setq reftex-cite-format
+        '((?c . "\\cite{%l}")
+          (?p . "\\parencite{%l}")
+          (?t . "\\textcite{%l}")
+          (?f . "\\footcite{%l}")
+          (?s . "\\supercite{%l}")
+          (?a . "\\autocite{%l}"))))
+
+;; syntax checker
 (use-package flycheck
   :ensure t
   :init (global-flycheck-mode))
@@ -143,4 +185,7 @@
   (completion-category-defaults nil)) ;; Disable defaults, use our settings)
 
 (use-package magit
+  :ensure t)
+
+(use-package undo-fu
   :ensure t)
