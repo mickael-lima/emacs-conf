@@ -12,6 +12,11 @@
       (package-refresh-contents))
     (package-install 'use-package)))
 
+(eval-when-compile
+  (require 'use-package))
+
+(setq use-package-always-ensure t)
+
 ;; Hide dev warnings when installing a new package
 (add-to-list 'display-buffer-alist
              '("\\`\\*\\(Warnings\\|Compile-Log\\)\\*\\'"
@@ -19,7 +24,7 @@
                (allow-no-window . t)))
 
 ;; Font
-(set-face-attribute 'default nil :font "AporeticSansMonoNerdFont-14")
+(set-face-attribute 'default nil :font "Aporetic Sans Mono-14")
 
 ;; Number line mode
 (global-display-line-numbers-mode)
@@ -35,16 +40,12 @@
 
 ;; Why this is not the default?
 (setq delete-selection-mode t)
-
+ 
 ;; LaTeX variables
-(add-to-list 'TeX-view-program-list '("PDF Tools" TeX-pdf-tools-sync-view))
-(setq TeX-view-program-selection '((output-pdf "PDF Tools")))
+(setq TeX-view-program-selection '((output-pdf "PDF Tools"))
+      TeX-source-correlate-start-server t)
 
-(setq TeX-source-correlate-mode t)
-(setq TeX-source-correlate-method '((pdf . synctex)))
-
-(add-hook 'TeX-after-compilation-finished-functions
-          #'TeX-revert-document-buffer)
+(add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
 
 (setq-default TeX-master nil)
 
