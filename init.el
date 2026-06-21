@@ -4,13 +4,7 @@
 ;; Loading use-package
 (require 'package)
 (add-to-list 'package-archives '("gnu"   . "https://elpa.gnu.org/packages/"))
-
-;; Configuring use-package for emacs < 29
-(when (< emacs-major-version 29)
-  (unless (package-installed-p 'use-package)
-    (unless package-archives-contents
-      (package-refresh-contents))
-    (package-install 'use-package)))
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 
 (eval-when-compile
   (require 'use-package))
@@ -27,7 +21,10 @@
 (set-face-attribute 'default nil :font "Aporetic Sans Mono-14")
 
 ;; Number line mode
-(global-display-line-numbers-mode)
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+(add-hook 'text-mode-hook 'display-line-numbers-mode)
+(add-hook 'conf-mode-hook 'display-line-numbers-mode)
+(setq display-line-numbers-type 'relative)
 
 ;; whick-key is now embeded in emacs
 (which-key-mode 1)
@@ -40,12 +37,6 @@
 
 ;; Why this is not the default?
 (setq delete-selection-mode t)
- 
-;; LaTeX variables
-(setq TeX-view-program-selection '((output-pdf "PDF Tools"))
-      TeX-source-correlate-start-server t)
-
-(add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
 
 (setq-default TeX-master nil)
 
@@ -77,13 +68,11 @@
 
 (use-package evil-collection
   :after evil
-  :config
+  :init
   (evil-collection-init))
 
-;; AucTeX settings - from https://fmneto.com/2026/04/17/ensinando-latex-para-o-emacs/
-(use-package pdf-tools
-  :ensure t)
 
+;; AucTeX settings - from https://fmneto.com/2026/04/17/ensinando-latex-para-o-emacs/
 (use-package tex
   :ensure auctex
   :defer t
@@ -99,7 +88,6 @@
       TeX-parse-self t
       TeX-save-query nil
       TeX-PDF-mode t
-      TeX-engine 'xetex
       TeX-source-correlate-mode t
       TeX-source-correlate-method 'synctex
       TeX-source-correlate-start-server t))
@@ -108,6 +96,21 @@
   :after (company tex)
   :config
   (company-auctex-init))
+
+(use-package pdf-tools
+  :defer t
+  :magic ("%PDF" . pdf-view-mode) ;; ensure DocView is not used
+  :config
+  (pdf-tools-install :no-query)
+  (setq-default pdf-view-display-size 'fit-width)
+  (define-key pdf-view-mode-map (kbd "C-s") 'isearch-forward))
+
+(setq TeX-view-program-selection '((output-pdf "PDF Tools"))
+      TeX-view-program-list '(("PDF Tools" TeX-pdf-tools-sync-view))
+      TeX-source-correlate-start-server t)
+
+(add-hook 'TeX-after-compilation-finished-functions
+  #'TeX-revert-document-buffer)
 
 (use-package reftex
   :defer t
@@ -188,5 +191,14 @@
 (use-package magit
   :ensure t)
 
-(use-package undo-fu
+(use-package diff-hl
+  :ensure t
+  :hook (dired-mode . diff-hl-dired-mode)
+  :init
+  (global-diff-hl-mode 1)
+  (diff-hl-flydiff-mode 1)
+  (unless (display-graphic-p)
+    (diff-hl-margin-mode 1)))
+
+(use-package elcord
   :ensure t)
