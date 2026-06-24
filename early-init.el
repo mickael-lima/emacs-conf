@@ -1,4 +1,3 @@
-
 ;; Temporarily increase GC threshold during startup
 (setq gc-cons-threshold most-positive-fixnum)
 
@@ -13,4 +12,5 @@
 (setq inhibit-startup-screen t)
 (setq native-comp-speed 2)
 
-(load-theme 'modus-vivendi-deuteranopia t)
+;; Prevent the white flashbang on startup
+(add-to-list 'default-frame-alist '(background-color . "#1a1b26"))

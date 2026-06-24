@@ -18,7 +18,7 @@
                (allow-no-window . t)))
 
 ;; Font
-(set-face-attribute 'default nil :font "Aporetic Sans Mono-14")
+(set-face-attribute 'default nil :font "Aporetic Sans Mono-12")
 
 ;; Number line mode
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
@@ -38,7 +38,18 @@
 ;; Why this is not the default?
 (setq delete-selection-mode t)
 
+;; Ctrl + Backspace does not mess with my clipboard
+(global-set-key (kbd "<C-backspace>") (lambda () 
+					(interactive) 
+					(delete-region (point) 
+						       (progn (forward-word -1) (point)))))
+
+;; Ask who is the master file in LaTeX-mode
 (setq-default TeX-master nil)
+
+;; Transparency bg, cool looking
+(set-frame-parameter nil 'alpha-background 90)
+(add-to-list 'default-frame-alist '(alpha-background . 90))
 
 ;; --- Packages ---
 (use-package evil
@@ -58,6 +69,7 @@
   :config
   (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
   (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+  (evil-set-undo-system 'undo-redo)
 
   ;; Use visual line motions even outside of visual-line-mode buffers
   (evil-global-set-key 'motion "j" 'evil-next-visual-line)
@@ -202,3 +214,24 @@
 
 (use-package elcord
   :ensure t)
+
+(use-package ef-themes
+  :ensure t
+  :init
+  (load-theme 'ef-winter :noconfirm))
+
+;; Dired custom config - https://github.com/daviwil/emacs-from-scratch/blob/8c302a79bf5700f6ef0279a3daeeb4123ae8bd59/Emacs.org#dired
+(use-package dired
+  :ensure nil
+  :commands (dired dired-jump)
+  :bind (("C-x C-j" . dired-jump))
+  :custom ((dired-listing-switches "-agho --group-directories-first"))
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "h" 'dired-single-up-directory
+    "l" 'dired-single-buffer))
+
+(use-package dired-single)
+
+(use-package all-the-icons-dired
+  :hook (dired-mode . all-the-icons-dired-mode))
