@@ -37,6 +37,7 @@
 
 ;; Why this is not the default?
 (setq delete-selection-mode t)
+(global-visual-line-mode)
 
 ;; Ctrl + Backspace does not mess with my clipboard
 (global-set-key (kbd "<C-backspace>") (lambda () 
@@ -83,6 +84,24 @@
   :init
   (evil-collection-init))
 
+;; Auto-complete
+(use-package company
+  :ensure t
+  :init
+  (global-company-mode))
+
+(use-package lsp-mode
+  :init
+  ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
+  (setq lsp-keymap-prefix "C-c l")
+  :hook ((LaTeX-mode . lsp)
+	 (c-mode . lsp)
+	 (python-mode . lsp)
+         (Lsp-mode . lsp-enable-which-key-integration))
+  :commands lsp)
+
+;; optionally
+(use-package lsp-ui :commands lsp-ui-mode)
 
 ;; AucTeX settings - from https://fmneto.com/2026/04/17/ensinando-latex-para-o-emacs/
 (use-package tex
@@ -155,21 +174,6 @@
   :init
   (vertico-mode))
 
-(use-package corfu
-  :ensure t
-  
-  :custom
-  (corfu-cycle t)
-  (corfu-preselect 'prompt)
-
-  (corfu-auto t)
-  (corfu-auto-delay 0.2)
-  (corfu-auto-trigger ".") ;; Custom trigger characters
-  (corfu-quit-no-match 'separator) ;; or t
-  
-  :init
-  (global-corfu-mode))
-
 ;; Persist history over Emacs restarts. Vertico sorts by history position.
 (use-package savehist
   :ensure t
@@ -190,16 +194,6 @@
   (minibuffer-prompt-properties
    '(read-only t cursor-intangible t face minibuffer-prompt)))
   
-;; orderless completion style for corfu
-(use-package orderless
-  :ensure t
-  :custom
-  ;; (orderless-style-dispatchers '(orderless-affix-dispatch))
-  ;; (orderless-component-separator #'orderless-escapable-split-on-space)
-  (completion-styles '(orderless basic))
-  (completion-category-overrides '((file (styles partial-completion))))
-  (completion-category-defaults nil)) ;; Disable defaults, use our settings)
-
 (use-package magit
   :ensure t)
 
@@ -235,3 +229,9 @@
 
 (use-package all-the-icons-dired
   :hook (dired-mode . all-the-icons-dired-mode))
+
+;; --- org mode ---
+(use-package org
+  :ensure t)
+
+(plist-put org-format-latex-options :scale 1.5)
