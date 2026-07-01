@@ -17,8 +17,23 @@
                (display-buffer-no-window)
                (allow-no-window . t)))
 
-;; Font
-(set-face-attribute 'default nil :font "Aporetic Sans Mono-12")
+;; Fonts 
+(set-face-attribute 'default nil
+		    :font "JetBrains Mono"
+		    :weight 'normal
+		    :height 140)
+
+;; Set the fixed pitch face
+(set-face-attribute 'fixed-pitch nil
+                    :font "JetBrains Mono"
+                    :weight 'normal
+                    :height 140)
+
+;; Set the variable pitch face
+(set-face-attribute 'variable-pitch nil
+                    :font "Iosevka Aile"
+                    :height 120
+                    :weight 'normal)
 
 ;; Number line mode
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
@@ -34,6 +49,14 @@
 
 ;; Revert buffers when the underlying file has changed
 (global-auto-revert-mode 1)
+
+;; Enforce agenda view on startup
+(setq org-agenda-window-setup 'current-window)
+
+(setq initial-buffer-choice
+      (lambda ()
+        (org-agenda-list)
+        (get-buffer "*Org Agenda*")))
 
 ;; Why this is not the default?
 (setq delete-selection-mode t)
@@ -212,7 +235,7 @@
 (use-package ef-themes
   :ensure t
   :init
-  (load-theme 'ef-winter :noconfirm))
+  (load-theme 'ef-dark :noconfirm))
 
 ;; Dired custom config - https://github.com/daviwil/emacs-from-scratch/blob/8c302a79bf5700f6ef0279a3daeeb4123ae8bd59/Emacs.org#dired
 (use-package dired
@@ -225,13 +248,36 @@
     "h" 'dired-single-up-directory
     "l" 'dired-single-buffer))
 
-(use-package dired-single)
-
 (use-package all-the-icons-dired
   :hook (dired-mode . all-the-icons-dired-mode))
 
 ;; --- org mode ---
 (use-package org
-  :ensure t)
+  :ensure t
+  :config
+  (setq
+   org-agenda-files '("~/org")
+   org-log-done 'time
+   org-return-follows-link t
+   org-agenda-span 14
+   org-auto-align-tags nil
+   org-tags-column 0
+   org-catch-invisible-edits 'show-and-error
+   org-special-ctrl-a/e t
+   org-insert-heading-respect-content t
 
-(plist-put org-format-latex-options :scale 1.5)
+   ;; Org styling, hide markup etc.
+   org-hide-emphasis-markers t
+   org-pretty-entities t
+   org-agenda-tags-column 0
+   org-ellipsis "…")
+  
+  (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
+  (plist-put org-format-latex-options :scale 1.5)
+  :hook (org-mode-hook  . org-indent-mode))
+
+(use-package org-modern
+  :ensure t
+  :init
+  (global-org-modern-mode))
+
