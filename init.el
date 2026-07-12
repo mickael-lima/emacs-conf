@@ -126,6 +126,11 @@
 ;; optionally
 (use-package lsp-ui :commands lsp-ui-mode)
 
+(use-package elec-pair
+  :ensure nil
+  :init
+  (electric-pair-mode 1))
+
 ;; AucTeX settings - from https://fmneto.com/2026/04/17/ensinando-latex-para-o-emacs/
 (use-package tex
   :ensure auctex
@@ -136,7 +141,7 @@
 	 (LaTeX-mode . outline-minor-mode)
 	 (LaTeX-mode . TeX-source-correlate-mode)
 	 (LaTeX-mode . (lambda ()
-			 (setq-local TeX-command-default "LatexMk"))))
+			 (setq-local TeX-command-default "latexmk"))))
   :config
   (setq TeX-auto-save t
       TeX-parse-self t
